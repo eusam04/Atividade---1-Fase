@@ -6,41 +6,45 @@ import java.util.Scanner;
 import Excecoes.CategoriaInvalidaException;
 import Excecoes.CodigoDuplicadoException;
 import Excecoes.QntdEstoqueInvalidaException;
+import excecoes.EntradaInvalidaException;
+import excecoes.PrecoInvalidoException;
 
 public class Sistema {
-	
-	private ArrayList<Produto>produtos;
+
+	private ArrayList<Produto> produtos;
 
 	public Sistema() {
 		this.produtos = new ArrayList<Produto>();
 	}
-	public void adicionarProduto(Scanner scanner) 
-	        throws QntdEstoqueInvalidaException, CategoriaInvalidaException, CodigoDuplicadoException {
 
-	    System.out.println("Digite o nome do produto: ");
-	    String nome = scanner.nextLine();
-
-	    System.out.println("Digite o código: ");
-	    String codigo = scanner.nextLine();
-
-	    for (Produto p : produtos) {
-	        if (p.getCodigo().equals(codigo)) {
-	            throw new CodigoDuplicadoException("Já existe um produto com esse código!");
-	        }
-	    }
+	public void adicionarProduto(Scanner scanner) throws PrecoInvalidoException, EntradaInvalidaException{
+		System.out.println("Digite o nome do produto: ");
+		String nome = scanner.nextLine();
+		System.out.println("Digite o código: ");
+		String codigo = scanner.nextLine();
 		System.out.println("Digite o preço do produto: ");
 		Double preco = scanner.nextDouble();
 		scanner.nextLine();
+		
 		if(preco <= 0) {
-			throw new QntdEstoqueInvalidaException("O preço precisa ser maior que 0");
+			throw new PrecoInvalidoException("O preço precisa ser maior que 0");
 		}
 
 		System.out.println("Qual o tipo do produto: ");
 		System.out.println("1 - Móvel ");
 		System.out.println("2 - Eletro ");
 
-		int opcao = scanner.nextInt();
-		scanner.nextLine();
+		 int opcao;
+		 
+		    try {
+		        opcao = scanner.nextInt();
+		    } 
+		    catch (InputMismatchException e) {
+		        scanner.nextLine();
+		        throw new EntradaInvalidaException("A opção deve ser os números inteiros: (1 ou 2)");
+		    }
+		    scanner.nextLine();
+
 
 		if (opcao == 1) {
 			adicionarMovel(scanner, nome, codigo, preco);
@@ -48,6 +52,7 @@ public class Sistema {
 			adicionarEletro(scanner, nome, codigo, preco);
 		}
 	}
+
 	private void adicionarMovel(Scanner scanner, String nome, String codigo, double preco) {
 		System.out.println("Digite o material:");
 		String material = scanner.nextLine();
@@ -61,7 +66,8 @@ public class Sistema {
 		System.out.println("Produto adicionado");
 		
 	}
-	private void adicionarEletro(Scanner scanner, String nome, String codigo, double preco) throws CategoriaInvalidaException {
+	
+	private void adicionarEletro(Scanner scanner, String nome, String codigo, double preco) {
 		CategoriaEletro categoriaEletro = null;
 		System.out.println("Qual a categoria do eletrodomestico cadastrado?");
 		System.out.println("1 - Cozinha");
@@ -76,8 +82,6 @@ public class Sistema {
 			categoriaEletro = CategoriaEletro.QUARTO;
 		} else if (opcaoCategoria == 3) {
 			categoriaEletro = CategoriaEletro.LAVANDERIA;
-		}else {
-			throw new CategoriaInvalidaException("Categoria inválida selecionada!");
 		}
 		System.out.println("Digite a voltagem");
 		int voltagem = scanner.nextInt();
@@ -87,27 +91,36 @@ public class Sistema {
 		System.out.println("Produto adicionado");
 
 	}
-	public void  listarProdutos() {
+
+	public void listarProdutos()  {
 		if (produtos.size() == 0) {
-			System.out.println("Nenhum produto cadastrado!");
-	    } else {
-	    	for (Produto produto : produtos) {
+			System.out.println("Lista vazia!");
+		}
+			
+		else {
+			for (Produto produto : produtos) {
 				System.out.println(produto);
-	        }
-	    }
+			}
+		}
+
 	}
-	public void buscarProduto(Scanner scanner) {
+	
+	
+	public Produto buscarProduto(Scanner scanner) {
 		System.out.println("Digite o código procurado:");
 		String codigoProcurado = scanner.nextLine();
 		
-		for (Produto p : produtos) {
-			if (p.getCodigo().equals(codigoProcurado)) {
+		for (Produto produto : produtos) {
+			if(produto.getCodigo().equals(codigoProcurado)) {
 				System.out.println("Produto encontrado!");
-				System.out.println(produtos);
-        }
-		System.out.println("Produto não encontrado!");
+				System.out.println(produto);
+				return produto;
+			}
 		}
+		System.out.println("Produto não encontrado!");
+		return null;
 	}
+
 	public void removerProduto(Scanner scanner) {
 		System.out.println("Digite o código do produto: ");
 		String codigoProcurado = scanner.nextLine();
@@ -115,12 +128,12 @@ public class Sistema {
 			if(produtos.get(i).getCodigo().equals(codigoProcurado)) {
 				produtos.remove(i);
 				System.out.println("Produto removido");
-				
-            }
-        }
+				return;
+			}
+		}
 		System.out.println("Produto não encontrado!");
-        }
-    }
+	}
+}
 
 
 
